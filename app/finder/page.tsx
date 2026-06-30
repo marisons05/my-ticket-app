@@ -12,6 +12,17 @@ const supabase = createClient(
 
 export const FINDER_LIKED_KEY = 'finder_liked_events'
 
+function seedToNum(s: string): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) {
+    h = Math.imul(31, h) + s.charCodeAt(i) | 0
+  }
+  return Math.abs(h) % 900 + 10
+}
+function picsumUrl(id: string, w = 600, h = 480) {
+  return `https://picsum.photos/id/${seedToNum(id)}/${w}/${h}`
+}
+
 type Event = {
   id: string
   title: string
@@ -259,10 +270,13 @@ export default function FinderPage() {
                   transformOrigin: 'bottom center',
                   overflow: 'hidden',
                 }}>
-                  {next.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={next.image_url} alt="" style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', opacity: 0.5 }} />
-                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={next.image_url || picsumUrl(next.id)}
+                    alt=""
+                    onError={(e) => { const img = e.currentTarget; img.onerror = null; img.src = picsumUrl(next.id) }}
+                    style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', opacity: 0.5 }}
+                  />
                 </div>
               )}
 
@@ -318,19 +332,14 @@ export default function FinderPage() {
                   </div>
 
                   {/* Event image */}
-                  {current.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={current.image_url}
-                      alt={current.title}
-                      draggable={false}
-                      style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', flexShrink: 0 }}
-                    />
-                  ) : (
-                    <div style={{ width: '100%', height: 240, background: 'linear-gradient(135deg, #b47dff33, #7c3aed55)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: 64 }}>🎵</span>
-                    </div>
-                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={current.image_url || picsumUrl(current.id)}
+                    alt={current.title}
+                    draggable={false}
+                    onError={(e) => { const img = e.currentTarget; img.onerror = null; img.src = picsumUrl(current.id) }}
+                    style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', flexShrink: 0 }}
+                  />
 
                   {/* Fade image into card */}
                   <div style={{ height: 56, marginTop: -56, background: 'linear-gradient(to bottom, transparent, rgba(18,4,40,0.97))', flexShrink: 0, pointerEvents: 'none' }} />

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import Navbar from '../components/Navbar'
 import EventMap from '../components/EventMap'
+import EventImage from '../components/EventImage'
 
 
 const DOTS = [
@@ -103,14 +104,7 @@ export default async function EventsPage() {
                 return (
                   <div key={event.id} className="ev-card" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, backdropFilter: 'blur(12px)', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     {/* Image */}
-                    {event.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={event.image_url} alt={event.title} style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
-                    ) : (
-                      <div style={{ width: '100%', height: 180, background: `linear-gradient(135deg, ${accent}33, #7c3aed44)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: 48, height: 48, borderRadius: '50%', background: `linear-gradient(135deg, ${accent}, #7c3aed)`, opacity: 0.6 }} />
-                      </div>
-                    )}
+                    <EventImage src={event.image_url} alt={event.title} seed={event.id} height={180} />
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', flex: 1 }}>
                       <div style={{ height: 3, background: `linear-gradient(90deg, ${accent}, transparent)`, margin: '-24px -24px 16px' }} />
                       <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, marginBottom: 10, letterSpacing: 1 }}>{event.title}</h3>
