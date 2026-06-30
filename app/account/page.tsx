@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import { createClient, type User } from '@supabase/supabase-js'
 import Navbar from '../components/Navbar'
+import Link from 'next/link'
+
+const FINDER_LIKED_KEY = 'finder_liked_events'
 
 const supabase = createClient(
   process.env['NEXT_PUBLIC_SUPABASE_URL']!,
@@ -18,6 +21,22 @@ const NOTES = [
 
 const ACCENT_COLORS = ['#b47dff', '#ff6b9d', '#00d4ff']
 
+type LikedEvent = {
+  id: string
+  title: string
+  date: string
+  location: string
+  price: number
+  image_url?: string
+}
+
+function formatEventDate(dateStr: string): string {
+  const d = new Date(dateStr)
+  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`
+}
+
 export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null)
   const [username, setUsername] = useState('')
@@ -27,6 +46,17 @@ export default function AccountPage() {
   const [favoriteArtists, setFavoriteArtists] = useState<string[]>([])
   const [newArtist, setNewArtist] = useState('')
   const [artistMessage, setArtistMessage] = useState('')
+
+  const [likedEvents, setLikedEvents] = useState<LikedEvent[]>([])
+
+  useEffect(() => {
+    const ids: string[] = JSON.parse(localStorage.getItem(FINDER_LIKED_KEY) || '[]')
+    if (ids.length > 0) {
+      supabase.from('events').select('*').in('id', ids).then(({ data }) => {
+        if (data) setLikedEvents(data)
+      })
+    }
+  }, [])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -294,6 +324,50 @@ export default function AccountPage() {
 
             {artistMessage && (
               <p style={{ marginTop: 12, color: '#00d4ff', fontSize: 13, fontWeight: 600 }}>{artistMessage}</p>
+            )}
+          </div>
+
+          {/* Liked Events */}
+          <div className="acc-card" style={{ ...cardStyle }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #ff6b9d, #b47dff, transparent)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase' }}>♥ Liked Events</p>
+              <Link href="/finder" style={{ color: '#b47dff', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Open Finder →</Link>
+            </div>
+            {likedEvents.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: 14 }}>
+                No liked events yet. Head to the <Link href="/finder" style={{ color: '#b47dff', textDecoration: 'none', fontWeight: 600 }}>Finder</Link> and swipe right on events you like!
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {likedEvents.map((event, i) => {
+                  const color = ACCENT_COLORS[i % ACCENT_COLORS.length]
+                  return (
+                    <div key={event.id} style={{ display: 'flex', gap: 14, alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
+                      {event.image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={event.image_url} alt={event.title} style={{ width: 72, height: 72, objectFit: 'cover', flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 72, height: 72, flexShrink: 0, background: `linear-gradient(135deg, ${color}33, #7c3aed44)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🎵</div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0, padding: '10px 0' }}>
+                        <p style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.title}</p>
+                        <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 12, marginBottom: 2 }}>📅 {formatEventDate(event.date)}</p>
+                        <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 12 }}>📍 {event.location}</p>
+                      </div>
+                      <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+                        <span style={{ color: 'white', fontSize: 16, fontWeight: 900 }}>€{event.price}</span>
+                        <Link
+                          href={`/checkout?eventId=${encodeURIComponent(event.id)}`}
+                          style={{ background: `linear-gradient(135deg, ${color}, #7c3aed)`, color: 'white', padding: '6px 14px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}
+                        >
+                          Buy
+                        </Link>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
 

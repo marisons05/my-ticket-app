@@ -23,6 +23,8 @@ export default function AdminPage() {
   const [coordsStatus, setCoordsStatus] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const lookupAddress = async () => {
     if (!address.trim()) return
@@ -41,6 +43,16 @@ export default function AdminPage() {
     }
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null
+    setImageFile(file)
+    if (file) {
+      setImagePreview(URL.createObjectURL(file))
+    } else {
+      setImagePreview(null)
+    }
+  }
+
   const handleSubmit = async () => {
     if (!form.title || !form.date || !form.price || !form.total_tickets) {
       setMessage('Please fill in all fields')
@@ -51,6 +63,23 @@ export default function AdminPage() {
       return
     }
     setLoading(true)
+
+    let image_url: string | null = null
+    if (imageFile) {
+      const ext = imageFile.name.split('.').pop()
+      const path = `events/${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('event-images')
+        .upload(path, imageFile, { upsert: true })
+      if (uploadError) {
+        setMessage('Image upload failed: ' + uploadError.message)
+        setLoading(false)
+        return
+      }
+      const { data: urlData } = supabase.storage.from('event-images').getPublicUrl(path)
+      image_url = urlData.publicUrl
+    }
+
     const { error } = await supabase.from('events').insert({
       title: form.title,
       description: form.description,
@@ -60,7 +89,8 @@ export default function AdminPage() {
       total_tickets: parseInt(form.total_tickets),
       tickets_remaining: parseInt(form.total_tickets),
       latitude: coords.lat,
-      longitude: coords.lng
+      longitude: coords.lng,
+      ...(image_url ? { image_url } : {}),
     })
     setLoading(false)
     if (error) setMessage(error.message)
@@ -70,6 +100,8 @@ export default function AdminPage() {
       setAddress('')
       setCoords(null)
       setCoordsStatus('')
+      setImageFile(null)
+      setImagePreview(null)
     }
   }
 
@@ -92,6 +124,21 @@ export default function AdminPage() {
           <h1 style={{fontSize: '24px', fontWeight: 'bold', color: '#111', marginBottom: '24px'}}>
             ➕ Add New Event
           </h1>
+
+          <label style={{fontWeight: '600', color: '#333', fontSize: '14px'}}>Event Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{...inputStyle, padding: '8px 12px', cursor: 'pointer'}}
+          />
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              style={{width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px'}}
+            />
+          )}
 
           <label style={{fontWeight: '600', color: '#333', fontSize: '14px'}}>Event Title</label>
           <input style={inputStyle} placeholder="e.g. Club Night at Skybar" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />

@@ -45,6 +45,9 @@ export default function Navbar() {
       </Link>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Link href="/finder" style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', letterSpacing: 0.3 }}>
+          ♥ Finder
+        </Link>
         {user ? (
           <>
             <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, fontWeight: 600, letterSpacing: 1 }}>
