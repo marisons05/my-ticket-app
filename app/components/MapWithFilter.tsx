@@ -147,7 +147,7 @@ export default function MapWithFilter({ events }: { events: any[] }) {
             <label style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>From</label>
             <DatePicker
               selected={from}
-              onChange={(d) => setFrom(d)}
+              onChange={(d: Date | null) => setFrom(d)}
               selectsStart
               startDate={from}
               endDate={to}
@@ -163,7 +163,7 @@ export default function MapWithFilter({ events }: { events: any[] }) {
             <label style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>To</label>
             <DatePicker
               selected={to}
-              onChange={(d) => setTo(d)}
+              onChange={(d: Date | null) => setTo(d)}
               selectsEnd
               startDate={from}
               endDate={to}
