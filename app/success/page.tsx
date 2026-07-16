@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import Navbar from '../components/Navbar'
@@ -11,7 +11,7 @@ const supabase = createClient(
   process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!
 )
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams()
   const eventId = searchParams.get('eventId')
   const [eventTitle, setEventTitle] = useState('')
@@ -30,7 +30,6 @@ export default function SuccessPage() {
         .single()
       if (event) setEventTitle(event.title)
 
-      // Insert ticket (skip if already exists)
       const { data: existing } = await supabase
         .from('tickets')
         .select('id')
@@ -47,6 +46,55 @@ export default function SuccessPage() {
     record()
   }, [eventId])
 
+  return (
+    <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 70px)', padding: '40px 24px' }}>
+      <div style={{ textAlign: 'center', animation: 'fadeUp 0.6s ease both', maxWidth: 480 }}>
+        <div style={{ fontSize: 72, animation: 'pop 0.5s ease 0.2s both', display: 'inline-block', marginBottom: 24 }}>🎟️</div>
+        <h1 style={{ color: 'white', fontSize: 32, fontWeight: 900, marginBottom: 12, letterSpacing: 0.5 }}>
+          You&apos;re in!
+        </h1>
+        {eventTitle && (
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16, marginBottom: 8 }}>
+            {eventTitle}
+          </p>
+        )}
+        <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 14, marginBottom: 36, lineHeight: 1.6 }}>
+          Your ticket is confirmed. You&apos;ve been added to the event groupchat — say hi to your fellow attendees!
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          {eventId && done && (
+            <Link
+              href={`/groupchats/${eventId}`}
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed, #ff6b9d)',
+                color: 'white',
+                padding: '14px 32px',
+                borderRadius: 12,
+                textDecoration: 'none',
+                fontSize: 16,
+                fontWeight: 800,
+                letterSpacing: 0.3,
+                animation: 'btnGlow 3s ease-in-out infinite',
+                display: 'inline-block',
+              }}
+            >
+              Open Groupchat →
+            </Link>
+          )}
+          <Link
+            href="/events"
+            style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, textDecoration: 'none', fontWeight: 600 }}
+          >
+            Back to events
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function SuccessPage() {
   return (
     <>
       <style>{`
@@ -86,50 +134,9 @@ export default function SuccessPage() {
           <Navbar />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 70px)', padding: '40px 24px' }}>
-          <div style={{ textAlign: 'center', animation: 'fadeUp 0.6s ease both', maxWidth: 480 }}>
-            <div style={{ fontSize: 72, animation: 'pop 0.5s ease 0.2s both', display: 'inline-block', marginBottom: 24 }}>🎟️</div>
-            <h1 style={{ color: 'white', fontSize: 32, fontWeight: 900, marginBottom: 12, letterSpacing: 0.5 }}>
-              You&apos;re in!
-            </h1>
-            {eventTitle && (
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16, marginBottom: 8 }}>
-                {eventTitle}
-              </p>
-            )}
-            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 14, marginBottom: 36, lineHeight: 1.6 }}>
-              Your ticket is confirmed. You&apos;ve been added to the event groupchat — say hi to your fellow attendees!
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-              {eventId && done && (
-                <Link
-                  href={`/groupchats/${eventId}`}
-                  style={{
-                    background: 'linear-gradient(135deg, #7c3aed, #ff6b9d)',
-                    color: 'white',
-                    padding: '14px 32px',
-                    borderRadius: 12,
-                    textDecoration: 'none',
-                    fontSize: 16,
-                    fontWeight: 800,
-                    letterSpacing: 0.3,
-                    animation: 'btnGlow 3s ease-in-out infinite',
-                    display: 'inline-block',
-                  }}
-                >
-                  Open Groupchat →
-                </Link>
-              )}
-              <Link
-                href="/events"
-                style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, textDecoration: 'none', fontWeight: 600 }}
-              >
-                Back to events
-              </Link>
-            </div>
-          </div>
-        </div>
+        <Suspense>
+          <SuccessContent />
+        </Suspense>
       </main>
     </>
   )
