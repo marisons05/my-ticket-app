@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient, type User } from '@supabase/supabase-js'
 import Link from 'next/link'
 
@@ -11,27 +11,45 @@ const supabase = createClient(
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
-  const [username, setUsername] = useState('')
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser(data.user)
-        supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', data.user.id)
-          .single()
-          .then(({ data: profile }) => {
-            if (profile) setUsername(profile.username)
-          })
-      }
+      if (data.user) setUser(data.user)
     })
   }, [])
 
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
   const handleLogout = async () => {
+    setOpen(false)
     await supabase.auth.signOut()
     window.location.href = '/login'
+  }
+
+  const itemStyle: React.CSSProperties = {
+    display: 'block',
+    padding: '11px 20px',
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 14,
+    fontWeight: 600,
+    textDecoration: 'none',
+    borderRadius: 8,
+    transition: 'background 0.15s',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
   }
 
   return (
@@ -44,37 +62,83 @@ export default function Navbar() {
         </div>
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link href="/finder" style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', letterSpacing: 0.3 }}>
-          ♥ Finder
-        </Link>
-        {user ? (
-          <>
-            <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, fontWeight: 600, letterSpacing: 1 }}>
-              {username || user.email}
-            </span>
-            <Link
-              href="/account"
-              style={{ border: '1px solid rgba(255,255,255,0.18)', color: 'white', padding: '8px 18px', borderRadius: 8, fontWeight: 600, textDecoration: 'none', fontSize: 14 }}
+      <div ref={menuRef} style={{ position: 'relative' }}>
+        <button
+          onClick={() => setOpen(o => !o)}
+          aria-label="Menu"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', flexDirection: 'column', gap: 5, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <span style={{ display: 'block', width: 22, height: 2, background: 'white', borderRadius: 2 }} />
+          <span style={{ display: 'block', width: 22, height: 2, background: 'white', borderRadius: 2 }} />
+          <span style={{ display: 'block', width: 22, height: 2, background: 'white', borderRadius: 2 }} />
+        </button>
+
+        {open && (
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+            background: 'rgba(18,4,40,0.97)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12, padding: '8px', minWidth: 180,
+            backdropFilter: 'blur(20px)', boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
+            zIndex: 100,
+          }}>
+            <Link href="/events" style={itemStyle} onClick={() => setOpen(false)}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
             >
-              My Account
+              Home
             </Link>
-            <button
-              onClick={handleLogout}
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #ff6b9d)', color: 'white', padding: '8px 18px', borderRadius: 8, fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: 14 }}
+            <Link href="/finder" style={itemStyle} onClick={() => setOpen(false)}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
             >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link href="/login" style={{ border: '1px solid rgba(255,255,255,0.18)', color: 'white', padding: '8px 22px', borderRadius: 8, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
-              Login
+              Finder
             </Link>
-            <Link href="/login" style={{ background: 'linear-gradient(135deg, #7c3aed, #ff6b9d)', color: 'white', padding: '8px 22px', borderRadius: 8, textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
-              Get Tickets
+            <Link href="/map" style={itemStyle} onClick={() => setOpen(false)}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+            >
+              Map
             </Link>
-          </>
+            <Link href="/groupchats" style={itemStyle} onClick={() => setOpen(false)}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+            >
+              Groupchats
+            </Link>
+
+            {user ? (
+              <>
+                <Link href="/account" style={itemStyle} onClick={() => setOpen(false)}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                >
+                  My Account
+                </Link>
+                <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '6px 8px' }} />
+                <button onClick={handleLogout} style={{ ...itemStyle, color: '#ff6b9d' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,107,157,0.08)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" style={itemStyle} onClick={() => setOpen(false)}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                >
+                  Login
+                </Link>
+                <Link href="/login" style={{ ...itemStyle, color: '#d4a8ff' }} onClick={() => setOpen(false)}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(180,125,255,0.08)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                >
+                  Get Tickets
+                </Link>
+              </>
+            )}
+          </div>
         )}
       </div>
     </nav>

@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import Navbar from '../components/Navbar'
-import EventMap from '../components/EventMap'
 import EventImage from '../components/EventImage'
 
 
@@ -85,19 +84,46 @@ export default async function EventsPage() {
 
         <div style={{ position: 'relative', zIndex: 10, padding: '40px 40px 80px' }}>
 
-          {/* Map section */}
-          <section className="ev-section" style={{ marginBottom: 64 }}>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 4, marginBottom: 8, textTransform: 'uppercase' }}>Explore</p>
-            <h2 style={{ color: 'white', fontSize: 28, fontWeight: 900, marginBottom: 24, letterSpacing: 1 }}>Events in Riga</h2>
-            <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}>
-              <EventMap events={events || []} />
+          {/* Hero section */}
+          <section className="ev-section" style={{ marginBottom: 72, textAlign: 'center', padding: '60px 0 20px' }}>
+            <p style={{ color: '#b47dff', fontSize: 11, letterSpacing: 6, marginBottom: 16, textTransform: 'uppercase', fontWeight: 700 }}>Premier Event Platform</p>
+            <h1 style={{ color: 'white', fontSize: 56, fontWeight: 900, letterSpacing: -1, marginBottom: 20, lineHeight: 1.1 }}>
+              Feel the<br />
+              <span style={{ background: 'linear-gradient(135deg, #b47dff, #ff6b9d, #00d4ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>energy.</span>
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 18, maxWidth: 480, margin: '0 auto 36px', lineHeight: 1.7 }}>
+              Discover the best live music, club nights, and cultural events — all in one place.
+            </p>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/map" style={{ background: 'linear-gradient(135deg, #7c3aed, #ff6b9d)', color: 'white', padding: '13px 32px', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 700, animation: 'btnGlow 3s ease-in-out infinite', display: 'inline-block' }}>
+                Explore the Map
+              </Link>
+              <Link href="/finder" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.85)', padding: '13px 32px', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 700, border: '1px solid rgba(255,255,255,0.12)', display: 'inline-block' }}>
+                Find Events
+              </Link>
+            </div>
+          </section>
+
+          {/* Stats bar */}
+          <section className="ev-section" style={{ marginBottom: 72 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 0, maxWidth: 680, margin: '0 auto', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
+              {[
+                { value: `${events?.length ?? 0}`, label: 'Events This Month' },
+                { value: 'Riga', label: 'City Centre Focus' },
+                { value: '24/7', label: 'Tickets Available' },
+              ].map((stat, i) => (
+                <div key={i} style={{ flex: 1, padding: '24px 16px', textAlign: 'center', borderRight: i < 2 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
+                  <div style={{ color: 'white', fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>{stat.value}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, letterSpacing: 2, marginTop: 4, textTransform: 'uppercase' }}>{stat.label}</div>
+                </div>
+              ))}
             </div>
           </section>
 
           {/* Events grid */}
           <section className="ev-section">
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 4, marginBottom: 8, textTransform: 'uppercase' }}>What&apos;s on</p>
-            <h2 style={{ color: 'white', fontSize: 28, fontWeight: 900, marginBottom: 28, letterSpacing: 1 }}>Upcoming Events</h2>
+            <h2 style={{ color: 'white', fontSize: 36, fontWeight: 900, marginBottom: 28, letterSpacing: -0.5 }}>Upcoming Events</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, maxWidth: 1100, margin: '0 auto' }}>
               {events?.map((event, i) => {
                 const accent = ACCENTS[i % ACCENTS.length]
