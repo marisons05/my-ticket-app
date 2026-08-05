@@ -22,7 +22,12 @@ function formatEventDate(dateStr: string): string {
 }
 
 export default async function EventsPage() {
-  const { data: events } = await supabase.from('events').select('*')
+  const { data: events } = await supabase
+    .from('events')
+    .select('*, venues(name)')
+    .eq('status', 'published')
+    .gte('starts_at', new Date().toISOString())
+    .order('starts_at', { ascending: true })
 
   return (
     <>
@@ -134,25 +139,40 @@ export default async function EventsPage() {
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', flex: 1 }}>
                       <div style={{ height: 3, background: `linear-gradient(90deg, ${accent}, transparent)`, margin: '-24px -24px 16px' }} />
                       <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, marginBottom: 10, letterSpacing: 1 }}>{event.title}</h3>
-                      <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 13, marginBottom: 4 }}>📅 {formatEventDate(event.date)}</p>
-                      <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 13, marginBottom: 8 }}>📍 {event.location}</p>
-                      {event.description && (
-                        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>{event.description}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 13, marginBottom: 4 }}>📅 {formatEventDate(event.starts_at)}</p>
+                      {(event.venues as {name:string}|null)?.name && (
+                        <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 13, marginBottom: 8 }}>📍 {(event.venues as {name:string}).name}</p>
                       )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                        <div>
-                          <span style={{ color: 'white', fontSize: 26, fontWeight: 900 }}>€{event.price}</span>
-                          {event.tickets_remaining != null && (
-                            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, marginLeft: 8 }}>{event.tickets_remaining} left</span>
-                          )}
+                      {event.genre_tags?.length > 0 && (
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                          {(event.genre_tags as string[]).map((tag: string) => (
+                            <span key={tag} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 20, background: 'rgba(180,125,255,0.15)', color: '#b47dff', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>{tag}</span>
+                          ))}
                         </div>
-                        <Link
-                          href={`/checkout?eventId=${encodeURIComponent(event.id)}`}
-                          className="ev-buy"
-                          style={{ background: `linear-gradient(135deg, ${accent}, #7c3aed)`, color: 'white', padding: '9px 22px', borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700, animation: 'btnGlow 3s ease-in-out infinite', display: 'inline-block' }}
-                        >
-                          Buy Ticket
-                        </Link>
+                      )}
+                      {event.description && (
+                        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>{(event.description as string).slice(0, 120)}{(event.description as string).length > 120 ? '…' : ''}</p>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: 'auto' }}>
+                        {event.ticket_url ? (
+                          <a
+                            href={event.ticket_url as string}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ev-buy"
+                            style={{ background: `linear-gradient(135deg, ${accent}, #7c3aed)`, color: 'white', padding: '9px 22px', borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700, animation: 'btnGlow 3s ease-in-out infinite', display: 'inline-block' }}
+                          >
+                            Get Tickets
+                          </a>
+                        ) : (
+                          <Link
+                            href={`/checkout?eventId=${encodeURIComponent(event.id)}`}
+                            className="ev-buy"
+                            style={{ background: `linear-gradient(135deg, ${accent}, #7c3aed)`, color: 'white', padding: '9px 22px', borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700, animation: 'btnGlow 3s ease-in-out infinite', display: 'inline-block' }}
+                          >
+                            Buy Ticket
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>
