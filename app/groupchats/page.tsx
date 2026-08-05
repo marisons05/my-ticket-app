@@ -110,7 +110,7 @@ export default function GroupchatsPage() {
                     textDecoration: 'none',
                   }}
                 >
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(204,0,0,0.15)', border: '1px solid rgba(204,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,26,26,0.15)', border: '1px solid rgba(255,26,26,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                     🎵
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>

@@ -57,7 +57,7 @@ export default async function CheckoutPage({
             }}
           >
             {/* Top accent bar */}
-            <div style={{ height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)', borderRadius: 2, marginBottom: 28 }} />
+            <div style={{ height: 2, background: 'linear-gradient(90deg, #ff1a1a, transparent)', borderRadius: 2, marginBottom: 28 }} />
 
             <h2 style={{ fontSize: 22, fontWeight: 900, color: 'white', marginBottom: 24, letterSpacing: 0.5 }}>
               Order Summary

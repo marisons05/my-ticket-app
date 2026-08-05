@@ -1,12 +1,19 @@
 import Stripe from 'stripe'
-const stripe = new Stripe(process.env['STRIPE_SECRET_KEY']!)
+
+// Lazy init — avoids Stripe throwing at module evaluation during Next.js build
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) _stripe = new Stripe(process.env['STRIPE_SECRET_KEY']!)
+  return _stripe
+}
+
 export async function POST(req: Request) {
   try {
     const { eventId, eventTitle, price } = await req.json()
     if (!eventId || !eventTitle || !price) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 })
     }
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {

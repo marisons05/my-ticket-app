@@ -55,9 +55,9 @@ export default function RainCanvas() {
 
       for (const drop of drops) {
         const gradient = ctx.createLinearGradient(drop.x, drop.y - drop.length, drop.x, drop.y)
-        gradient.addColorStop(0, `rgba(120,0,0,0)`)
-        gradient.addColorStop(0.5, `rgba(180,0,0,${drop.opacity * 0.6})`)
-        gradient.addColorStop(1, `rgba(220,20,20,${drop.opacity})`)
+        gradient.addColorStop(0, `rgba(180,0,0,0)`)
+        gradient.addColorStop(0.5, `rgba(230,0,0,${drop.opacity * 0.7})`)
+        gradient.addColorStop(1, `rgba(255,30,30,${drop.opacity})`)
 
         ctx.beginPath()
         ctx.strokeStyle = gradient
@@ -96,9 +96,8 @@ export default function RainCanvas() {
         inset: 0,
         width: '100%',
         height: '100%',
-        zIndex: 0,
+        zIndex: -1,
         pointerEvents: 'none',
-        backgroundColor: '#000',
       }}
       aria-hidden
     />

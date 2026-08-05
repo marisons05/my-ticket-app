@@ -5,7 +5,7 @@ import MapWithFilter from '../components/MapWithFilter'
 export default async function MapPage() {
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, starts_at, ticket_url, genre_tags, venues(name, lat, lng)')
+    .select('id, title, starts_at, ends_at, ticket_url, genre_tags, image_url, description, venues(name, address, lat, lng)')
     .eq('status', 'published')
     .order('starts_at', { ascending: true })
 

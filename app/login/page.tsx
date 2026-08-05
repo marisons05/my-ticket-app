@@ -56,9 +56,9 @@ export default function LoginPage() {
           to   { opacity: 1; transform: translateY(0);    }
         }
         .login-card { animation: fadeUp 0.6s ease 0.1s both; }
-        .login-input:focus { border-color: rgba(204,0,0,0.6) !important; background: rgba(255,255,255,0.08) !important; }
+        .login-input:focus { border-color: rgba(255,26,26,0.6) !important; background: rgba(255,255,255,0.08) !important; }
         .login-input::placeholder { color: rgba(255,255,255,0.3); }
-        .toggle-btn:hover { color: #cc0000 !important; }
+        .toggle-btn:hover { color: #ff1a1a !important; }
         .toggle-btn { transition: color 0.2s ease; }
         .submit-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .submit-btn { transition: all 0.2s ease; }
@@ -90,7 +90,7 @@ export default function LoginPage() {
 
             {/* Card header */}
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
-              <p style={{ color: '#cc0000', fontSize: 11, letterSpacing: 4, marginBottom: 12, textTransform: 'uppercase', fontWeight: 700 }}>
+              <p style={{ color: '#ff1a1a', fontSize: 11, letterSpacing: 4, marginBottom: 12, textTransform: 'uppercase', fontWeight: 700 }}>
                 {isSignUp ? 'Create Account' : 'Sign In'}
               </p>
               <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, letterSpacing: 1, marginBottom: 6 }}>
@@ -149,7 +149,7 @@ export default function LoginPage() {
             </button>
 
             {message && (
-              <p style={{ marginTop: 16, textAlign: 'center', fontSize: 13, color: isError ? '#cc0000' : 'rgba(255,255,255,0.7)' }}>
+              <p style={{ marginTop: 16, textAlign: 'center', fontSize: 13, color: isError ? '#ff1a1a' : 'rgba(255,255,255,0.7)' }}>
                 {message}
               </p>
             )}

@@ -6,7 +6,7 @@ import Navbar from '@/app/components/Navbar'
 
 const GENRES = ['TECHNO', 'HOUSE', 'DRUM & BASS', 'AMBIENT', 'TRANCE', 'HIP-HOP', 'JAZZ FUSION', 'AFROBEAT', 'ELECTRONIC', 'EXPERIMENTAL']
 
-const ACCENTS = ['#cc0000', 'rgba(255,255,255,0.7)', '#cc0000']
+const ACCENTS = ['#ff1a1a', 'rgba(255,255,255,0.7)', '#ff1a1a']
 
 const STATS = [
   { n: '50+', label: 'EVENTS THIS MONTH' },
@@ -54,7 +54,7 @@ export default async function LandingPage() {
         .land-cta     { animation: fadeUp 0.9s ease 0.6s both; }
         .land-card:hover {
           transform: translateY(-6px);
-          box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,58,237,0.25);
+          box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,26,26,0.15);
         }
         .land-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
         .cta-primary:hover { filter: brightness(1.15); transform: translateY(-2px); }
@@ -76,8 +76,8 @@ export default async function LandingPage() {
 
         {/* ── Hero ── */}
         <section className="land-hero" style={{ position: 'relative', zIndex: 10, padding: '80px 40px 40px', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: '1px solid rgba(180,0,0,0.5)', borderRadius: 20, padding: '5px 16px', marginBottom: 28, background: 'rgba(140,0,0,0.2)' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#cc0000', display: 'inline-block', boxShadow: '0 0 6px #cc0000' }} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: '1px solid rgba(255,26,26,0.5)', borderRadius: 20, padding: '5px 16px', marginBottom: 28, background: 'rgba(180,0,0,0.2)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff1a1a', display: 'inline-block', boxShadow: '0 0 6px #ff1a1a' }} />
             <span style={{ color: '#ff2222', fontSize: 11, fontWeight: 700, letterSpacing: 3 }}>LIVE IN RIGA</span>
           </div>
 
@@ -93,43 +93,49 @@ export default async function LandingPage() {
         </section>
 
 
-        {/* ── CTAs ── */}
-        <div className="land-cta" style={{ position: 'relative', zIndex: 10, display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', padding: '0 40px 80px' }}>
-          <Link href="/login" className="cta-primary" style={{ background: 'white', color: 'black', padding: '16px 44px', borderRadius: 12, textDecoration: 'none', fontSize: 16, fontWeight: 800, letterSpacing: 1, display: 'inline-block' }}>
-            GET TICKETS →
-          </Link>
-          <Link href="/login" className="cta-ghost" style={{ border: '2px solid rgba(255,255,255,0.5)', color: 'white', padding: '16px 44px', borderRadius: 12, textDecoration: 'none', fontSize: 16, fontWeight: 600, display: 'inline-block' }}>
-            BROWSE EVENTS
-          </Link>
-        </div>
 
-
-        {/* ── Black section ── */}
-        <div style={{ position: 'relative', zIndex: 10, background: '#000' }}>
 
         {/* ── Genres ── */}
-        <section style={{ padding: '64px 40px 48px', textAlign: 'center' }}>
+        <section style={{ position: 'relative', zIndex: 10, padding: '64px 40px 48px', textAlign: 'center' }}>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 4, marginBottom: 24, textTransform: 'uppercase' }}>What&apos;s on</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', maxWidth: 800, margin: '0 auto' }}>
             {GENRES.map((g, i) => (
-              <span key={g} className="genre-pill" style={{ padding: '7px 18px', borderRadius: 100, border: '1px solid', borderColor: i % 2 === 0 ? 'rgba(200,0,0,0.6)' : 'rgba(255,255,255,0.3)', color: 'white', fontSize: 10, fontWeight: 700, letterSpacing: 2, opacity: 0.85 }}>
+              <span key={g} className="genre-pill" style={{ padding: '7px 18px', borderRadius: 100, border: '1px solid', borderColor: i % 2 === 0 ? 'rgba(200,0,0,0.6)' : 'rgba(255,255,255,0.3)', background: '#000', color: 'white', fontSize: 10, fontWeight: 700, letterSpacing: 2, opacity: 0.85 }}>
                 {g}
               </span>
             ))}
           </div>
         </section>
 
+        {/* ── How it works ── */}
+        <section style={{ position: 'relative', zIndex: 10, padding: '80px 40px', borderTop: '1px solid rgba(255,255,255,0.08)', background: '#000' }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 4, marginBottom: 48, textAlign: 'center', textTransform: 'uppercase' }}>How it works</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 2, maxWidth: 900, margin: '0 auto' }}>
+            {[
+              { n: '01', title: 'Discover', body: 'Browse curated events happening in Riga — techno nights, live acts, underground raves.' },
+              { n: '02', title: 'Book', body: 'Grab your ticket in seconds. No account needed to browse, just to buy.' },
+              { n: '03', title: 'Connect', body: 'Join the event groupchat and meet people going before you even arrive. Find your crew.' },
+              { n: '04', title: 'Show up', body: 'Your ticket lives in your account. Scan at the door, nothing to print.' },
+            ].map(({ n, title, body }) => (
+              <div key={n} style={{ padding: '40px 32px', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: 11, color: '#ff1a1a', letterSpacing: 3, fontWeight: 700, marginBottom: 16 }}>{n}</div>
+                <h3 style={{ color: 'white', fontSize: 22, fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>{title}</h3>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.8 }}>{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* ── Teaser cards ── */}
-        <section style={{ padding: '0 40px 80px' }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 4, marginBottom: 28, textAlign: 'center', textTransform: 'uppercase' }}>Upcoming highlights</p>
+        <section style={{ position: 'relative', zIndex: 10, padding: '0 40px 80px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, letterSpacing: 4, marginBottom: 28, textAlign: 'center', textTransform: 'uppercase', paddingTop: 64 }}>Upcoming highlights</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, maxWidth: 1000, margin: '0 auto' }}>
             {events.map((event, i) => {
               const accent = ACCENTS[i % ACCENTS.length]
               const venue = (event.venues as { name: string } | null)?.name ?? 'Riga'
               const genre = event.genre_tags?.[0] ?? ''
               return (
-                <div key={event.id} className="land-card" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                  {/* image */}
+                <div key={event.id} className="land-card" style={{ background: '#000', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   {event.image_url && (
                     <div style={{ width: '100%', height: 420, position: 'relative', overflow: 'hidden' }}>
                       <img src={event.image_url} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -141,7 +147,6 @@ export default async function LandingPage() {
                       <span style={{ color: 'white', fontSize: 9, fontWeight: 700, letterSpacing: 2, background: accent, padding: '3px 10px', borderRadius: 4 }}>{genre.toUpperCase()}</span>
                     </div>
                   )}
-                  {/* content */}
                   <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', textAlign: 'center', fontFamily: 'var(--font-space-mono, monospace)' }}>
                     <h4 style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 8, letterSpacing: 0.5, fontFamily: 'var(--font-space-mono, monospace)' }}>{event.title}</h4>
                     <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginBottom: 2, fontFamily: 'var(--font-space-mono, monospace)' }}>{formatEventDate(event.starts_at)}</p>
@@ -156,40 +161,27 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* ── How it works ── */}
-        <section style={{ padding: '80px 40px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 4, marginBottom: 48, textAlign: 'center', textTransform: 'uppercase' }}>How it works</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 2, maxWidth: 900, margin: '0 auto' }}>
-            {[
-              { n: '01', title: 'Discover', body: 'Browse curated events happening in Riga — techno nights, live acts, underground raves.' },
-              { n: '02', title: 'Book', body: 'Grab your ticket in seconds. No account needed to browse, just to buy.' },
-              { n: '03', title: 'Show up', body: 'Your ticket lives in your account. Scan at the door, nothing to print.' },
-            ].map(({ n, title, body }) => (
-              <div key={n} style={{ padding: '40px 32px', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: 11, color: '#cc0000', letterSpacing: 3, fontWeight: 700, marginBottom: 16 }}>{n}</div>
-                <h3 style={{ color: 'white', fontSize: 22, fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>{title}</h3>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.8 }}>{body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* ── Black section ── */}
+        <div style={{ position: 'relative', zIndex: 10, background: '#000' }}>
 
         {/* ── This week ── */}
         <section style={{ padding: '80px 40px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <h2 style={{ color: 'white', fontSize: 'clamp(32px, 6vw, 72px)', fontWeight: 900, letterSpacing: -1, textAlign: 'center', marginBottom: 48, lineHeight: 1 }}>
-            This week in <span style={{ color: '#cc0000' }}>Riga.</span>
+            This week in <span style={{ color: '#ff1a1a' }}>Riga.</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 1, maxWidth: 900, width: '100%', border: '1px solid rgba(255,255,255,0.08)' }}>
             {[
-              { day: 'FRI', date: '08 AUG', name: 'Techno Night', venue: 'Melnsils Club', tag: 'TECHNO' },
-              { day: 'SAT', date: '09 AUG', name: 'Ambient Sessions', venue: 'Kaņepes Kultūras Centrs', tag: 'AMBIENT' },
-              { day: 'SUN', date: '10 AUG', name: 'Sunday Selectors', venue: 'Boathouse', tag: 'HOUSE' },
-              { day: 'TUE', date: '12 AUG', name: 'Drum & Bass Night', venue: 'Depo', tag: 'D&B' },
+              { day: 'SAT', date: '16 AUG', name: 'Techno Night', venue: 'Melnsils Club', tag: 'TECHNO' },
+              { day: 'SUN', date: '17 AUG', name: 'Ambient Sessions', venue: 'Kaņepes Kultūras Centrs', tag: 'AMBIENT' },
+              { day: 'MON', date: '18 AUG', name: 'Sunday Selectors', venue: 'Boathouse', tag: 'HOUSE' },
+              { day: 'WED', date: '20 AUG', name: 'Drum & Bass Night', venue: 'Depo', tag: 'D&B' },
+              { day: 'THU', date: '21 AUG', name: 'Jazz Fusion Night', venue: 'Kaņepes Kultūras Centrs', tag: 'JAZZ' },
+              { day: 'FRI', date: '22 AUG', name: 'Trance Collective', venue: 'Fabrika', tag: 'TRANCE' },
             ].map(({ day, date, name, venue, tag }) => (
               <div key={name} style={{ padding: '28px 32px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
                 <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
                   <div style={{ textAlign: 'center', minWidth: 40 }}>
-                    <div style={{ color: '#cc0000', fontSize: 10, fontWeight: 700, letterSpacing: 2 }}>{day}</div>
+                    <div style={{ color: '#ff1a1a', fontSize: 10, fontWeight: 700, letterSpacing: 2 }}>{day}</div>
                     <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>{date.split(' ')[0]}</div>
                     <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: 1 }}>{date.split(' ')[1]}</div>
                   </div>
@@ -198,7 +190,7 @@ export default async function LandingPage() {
                     <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{venue}</div>
                   </div>
                 </div>
-                <span style={{ color: '#cc0000', fontSize: 9, fontWeight: 700, letterSpacing: 2, border: '1px solid rgba(200,0,0,0.4)', padding: '4px 10px', borderRadius: 4, whiteSpace: 'nowrap' }}>{tag}</span>
+                <span style={{ color: '#ff1a1a', fontSize: 9, fontWeight: 700, letterSpacing: 2, border: '1px solid rgba(200,0,0,0.4)', padding: '4px 10px', borderRadius: 4, whiteSpace: 'nowrap' }}>{tag}</span>
               </div>
             ))}
           </div>
@@ -208,8 +200,11 @@ export default async function LandingPage() {
         </section>
 
 
+
+</div>{/* end black section */}
+
         {/* ── Bottom CTA ── */}
-        <section style={{ textAlign: 'center', padding: '80px 40px 100px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <section style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '80px 40px 100px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <h2 style={{ color: 'white', fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 900, marginBottom: 14, lineHeight: 1.1 }}>
             Ready to feel it live?
           </h2>
@@ -221,11 +216,27 @@ export default async function LandingPage() {
           </Link>
           <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12, marginTop: 20, letterSpacing: 1 }}>
             Already have an account?{' '}
-            <Link href="/login" style={{ color: 'rgba(255,107,157,0.6)', textDecoration: 'none', fontWeight: 600 }}>Log in →</Link>
+            <Link href="/login" style={{ color: '#ff1a1a', textDecoration: 'none', fontWeight: 600 }}>Log in →</Link>
           </p>
         </section>
 
-</div>{/* end black section */}
+        {/* ── Our Mission ── */}
+        <section style={{ position: 'relative', zIndex: 10, background: '#000', padding: '100px 40px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ maxWidth: 860, margin: '0 auto' }}>
+            <p style={{ color: '#ff1a1a', fontSize: 11, letterSpacing: 4, fontWeight: 700, textTransform: 'uppercase', marginBottom: 24 }}>Our Mission</p>
+            <h2 style={{ color: 'white', fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900, lineHeight: 1.1, letterSpacing: -1, marginBottom: 40 }}>
+              Riga has a pulse.<br />We just make it easier to feel.
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 48 }}>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16, lineHeight: 1.85, margin: 0 }}>
+                Every weekend, dozens of events happen across this city — techno nights, underground raves, live jazz, experimental shows. But they&apos;re scattered across Instagram pages, Facebook events, and word of mouth. Too many people miss out simply because they didn&apos;t know.
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16, lineHeight: 1.85, margin: 0 }}>
+                We built The Mix because we believe great nights shouldn&apos;t depend on who you know. One place, every event, every genre. And when you find something worth going to — a space to connect with the people already going.
+              </p>
+            </div>
+          </div>
+        </section>
 
       </main>
       </div>{/* end zIndex wrapper */}

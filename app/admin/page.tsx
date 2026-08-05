@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Navbar from '../components/Navbar'
 
@@ -10,6 +10,8 @@ const supabase = createClient(
 )
 
 export default function AdminPage() {
+  const [authChecked, setAuthChecked] = useState(false)
+  const [authError, setAuthError] = useState('')
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -23,8 +25,55 @@ export default function AdminPage() {
   const [coordsStatus, setCoordsStatus] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [backfillLoading, setBackfillLoading] = useState(false)
+  const [backfillResult, setBackfillResult] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setAuthError('Not logged in. Please sign in first.'); setAuthChecked(true); return }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile?.is_admin) {
+        setAuthError('Access denied — admin only.')
+      }
+      setAuthChecked(true)
+    }
+    checkAdmin()
+  }, [])
+
+  if (!authChecked) return (
+    <main style={{ minHeight: '100vh', background: '#3d1f7a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: 'white' }}>Checking access…</p>
+    </main>
+  )
+
+  if (authError) return (
+    <main style={{ minHeight: '100vh', background: '#3d1f7a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: 'white', fontSize: 18 }}>{authError}</p>
+    </main>
+  )
+
+  const backfillImages = async () => {
+    setBackfillLoading(true)
+    setBackfillResult('')
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/backfill-images', {
+      method: 'POST',
+      headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+    })
+    const json = await res.json()
+    if (res.ok) setBackfillResult(`✅ Updated ${json.updated} of ${json.total} RA events with images`)
+    else setBackfillResult(`❌ ${json.error}`)
+    setBackfillLoading(false)
+  }
 
   const lookupAddress = async () => {
     if (!address.trim()) return
@@ -121,9 +170,29 @@ export default function AdminPage() {
       <Navbar />
       <div style={{padding: '32px', maxWidth: '700px', margin: '0 auto'}}>
         <div style={{backgroundColor: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)'}}>
-          <h1 style={{fontSize: '24px', fontWeight: 'bold', color: '#111', marginBottom: '24px'}}>
-            ➕ Add New Event
-          </h1>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: 8}}>
+            <h1 style={{fontSize: '24px', fontWeight: 'bold', color: '#111', margin: 0}}>
+              ➕ Add New Event
+            </h1>
+            <div style={{display: 'flex', gap: 8, flexWrap: 'wrap'}}>
+              <button
+                onClick={backfillImages}
+                disabled={backfillLoading}
+                style={{fontSize: '14px', fontWeight: '700', color: '#b45309', background: '#fef3c7', padding: '8px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer'}}
+              >
+                {backfillLoading ? 'Fetching…' : 'Backfill RA Images'}
+              </button>
+              <a
+                href="/admin/staging"
+                style={{fontSize: '14px', fontWeight: '700', color: '#7c3aed', textDecoration: 'none', background: '#f0e8ff', padding: '8px 14px', borderRadius: '8px'}}
+              >
+                Review Queue →
+              </a>
+            </div>
+          </div>
+          {backfillResult && (
+            <p style={{marginBottom: 16, fontSize: 13, fontWeight: 600, color: backfillResult.startsWith('✅') ? 'green' : 'red'}}>{backfillResult}</p>
+          )}
 
           <label style={{fontWeight: '600', color: '#333', fontSize: '14px'}}>Event Image</label>
           <input

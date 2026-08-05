@@ -63,8 +63,8 @@ export default function Navbar() {
           transition: background 0.15s;
         }
         .nav-item:hover { background: rgba(255,255,255,0.07); }
-        .nav-item-danger { color: #cc0000 !important; }
-        .nav-item-danger:hover { background: rgba(204,0,0,0.08) !important; }
+        .nav-item-danger { color: #ff1a1a !important; }
+        .nav-item-danger:hover { background: rgba(255,26,26,0.08) !important; }
         .nav-hamburger span {
           display: block; width: 22px; height: 2px;
           background: white; border-radius: 2px; transition: opacity 0.2s;
@@ -87,10 +87,12 @@ export default function Navbar() {
         fontFamily: 'var(--font-space-mono, monospace)',
       }}>
 
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-            <span style={{ color: 'white', fontSize: 22, fontWeight: 700, letterSpacing: 2 }}>THE MIX</span>
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 9, letterSpacing: 4 }}>LIVE EVENTS</span>
+        <div style={{ width: 80 }} />
+
+        <Link href="/" style={{ textDecoration: 'none', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, alignItems: 'center' }}>
+            <span style={{ color: 'white', fontSize: 22, fontWeight: 700, letterSpacing: 2, textAlign: 'center' }}>THE MIX</span>
+            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 9, letterSpacing: 4, textAlign: 'center', width: '100%' }}>LIVE EVENTS</span>
           </div>
         </Link>
 
@@ -120,7 +122,7 @@ export default function Navbar() {
                   <Link href="/finder" className="nav-item" onClick={() => setOpen(false)}>Finder</Link>
                   <Link href="/map" className="nav-item" onClick={() => setOpen(false)}>Map</Link>
                   <Link href="/groupchats" className="nav-item" onClick={() => setOpen(false)}>Groupchats</Link>
-                  <Link href="/account" className="nav-item" onClick={() => setOpen(false)}>My Account</Link>
+                  <Link href="/account" className="nav-item" onClick={() => setOpen(false)}>Account</Link>
                   <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '6px 8px' }} />
                   <button onClick={handleLogout} className="nav-item nav-item-danger">Logout</button>
                 </div>

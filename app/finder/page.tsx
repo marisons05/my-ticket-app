@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Navbar from '../components/Navbar'
+import RainCanvas from '../components/RainCanvas'
 import Link from 'next/link'
 
 const supabase = createClient(
@@ -12,26 +13,15 @@ const supabase = createClient(
 
 export const FINDER_LIKED_KEY = 'finder_liked_events'
 
-function seedToNum(s: string): number {
-  let h = 0
-  for (let i = 0; i < s.length; i++) {
-    h = Math.imul(31, h) + s.charCodeAt(i) | 0
-  }
-  return Math.abs(h) % 900 + 10
-}
-function picsumUrl(id: string, w = 600, h = 480) {
-  return `https://picsum.photos/id/${seedToNum(id)}/${w}/${h}`
-}
 
 type Event = {
   id: string
   title: string
-  date: string
-  location: string
-  price: number
+  starts_at: string
+  venues: { name: string } | null
   description?: string
   image_url?: string
-  tickets_remaining?: number
+  ticket_url?: string
 }
 
 function formatEventDate(dateStr: string): string {
@@ -61,7 +51,7 @@ export default function FinderPage() {
     const stored = localStorage.getItem(FINDER_LIKED_KEY)
     if (stored) setLiked(JSON.parse(stored))
 
-    supabase.from('events').select('*').gte('date', new Date().toISOString()).order('date', { ascending: true }).then(({ data }) => {
+    supabase.from('events').select('*, venues(name)').gte('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).then(({ data }) => {
       if (data) {
         setEvents(data)
         const stored = localStorage.getItem(FINDER_LIKED_KEY)
@@ -166,9 +156,11 @@ export default function FinderPage() {
         .finder-btn { transition: transform 0.15s ease; }
       `}</style>
 
+      <RainCanvas />
+
       <main style={{
         minHeight: '100vh',
-        background: '#000',
+        background: 'transparent',
         position: 'relative',
         overflowX: 'hidden',
         fontFamily: 'var(--font-space-mono, monospace)',
@@ -182,21 +174,7 @@ export default function FinderPage() {
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 28, animation: 'fadeUp 0.5s ease both' }}>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 4, marginBottom: 6, textTransform: 'uppercase' }}>Discover</p>
-            <h1 style={{ color: 'white', fontSize: 28, fontWeight: 900, marginBottom: 8, letterSpacing: 1 }}>Event Finder</h1>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
-              Swipe <span style={{ color: '#00dc64', fontWeight: 700 }}>right</span> to save &nbsp;·&nbsp; Swipe <span style={{ color: '#cc0000', fontWeight: 700 }}>left</span> to skip
-            </p>
-            {liked.length > 0 && (
-              <Link href="/account" style={{ display: 'inline-block', marginTop: 8, color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                ♥ {liked.length} liked event{liked.length !== 1 ? 's' : ''} → view in account
-              </Link>
-            )}
-            {events.length > 0 && !done && (
-              <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 12, marginTop: 6 }}>
-                {events.length - index} event{events.length - index !== 1 ? 's' : ''} remaining
-              </p>
-            )}
+            <h1 style={{ color: 'white', fontSize: 28, fontWeight: 900, letterSpacing: 1 }}>Event Finder</h1>
           </div>
 
           {/* Card area */}
@@ -232,28 +210,27 @@ export default function FinderPage() {
               </Link>
             </div>
           ) : (
-            <div style={{ position: 'relative', width: '100%', maxWidth: 400, height: 540 }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: 400 }}>
+              {/* Red ambient glow */}
+              <div aria-hidden style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,26,26,0.18) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
 
               {/* Card behind (next event) */}
               {next && (
                 <div style={{
                   position: 'absolute',
-                  inset: 0,
+                  top: 0, left: 0, right: 0,
                   borderRadius: 24,
                   background: 'rgba(255,255,255,0.03)',
                   border: '1px solid rgba(255,255,255,0.06)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 60px rgba(255,26,26,0.08)',
                   transform: 'scale(0.93) translateY(18px)',
                   transformOrigin: 'bottom center',
                   overflow: 'hidden',
                 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={next.image_url || picsumUrl(next.id)}
-                    alt=""
-                    onError={(e) => { const img = e.currentTarget; img.onerror = null; img.src = picsumUrl(next.id) }}
-                    style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', opacity: 0.5 }}
-                  />
+                  {next.image_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={next.image_url} alt="" style={{ width: '100%', height: 420, objectFit: 'cover', display: 'block', opacity: 0.5 }} />
+                  )}
                 </div>
               )}
 
@@ -266,12 +243,11 @@ export default function FinderPage() {
                   onPointerUp={onPointerUp}
                   onPointerCancel={onPointerUp}
                   style={{
-                    position: 'absolute',
-                    inset: 0,
+                    position: 'relative',
                     borderRadius: 24,
                     background: 'rgba(10,10,10,0.98)',
                     border: '1px solid rgba(255,255,255,0.09)',
-                    boxShadow: '0 24px 72px rgba(0,0,0,0.65)',
+                    boxShadow: '0 24px 72px rgba(0,0,0,0.65), 0 0 80px rgba(255,26,26,0.12)',
                     overflow: 'hidden',
                     cursor: isDragging.current ? 'grabbing' : 'grab',
                     userSelect: 'none',
@@ -298,51 +274,32 @@ export default function FinderPage() {
                   {/* Skip overlay */}
                   <div style={{
                     position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none',
-                    background: 'linear-gradient(135deg, rgba(204,0,0,0.3), rgba(160,0,0,0.08))',
-                    border: '3px solid rgba(204,0,0,0.8)',
+                    background: 'linear-gradient(135deg, rgba(255,26,26,0.3), rgba(220,0,0,0.08))',
+                    border: '3px solid rgba(255,26,26,0.8)',
                     borderRadius: 24,
                     opacity: skipOpacity,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <span style={{ fontSize: 72, filter: 'drop-shadow(0 0 24px rgba(204,0,0,0.9))', color: '#cc0000' }}>✕</span>
+                    <span style={{ fontSize: 72, filter: 'drop-shadow(0 0 24px rgba(255,26,26,0.9))', color: '#ff1a1a' }}>✕</span>
                   </div>
 
                   {/* Event image */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={current.image_url || picsumUrl(current.id)}
-                    alt={current.title}
-                    draggable={false}
-                    onError={(e) => { const img = e.currentTarget; img.onerror = null; img.src = picsumUrl(current.id) }}
-                    style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block', flexShrink: 0 }}
-                  />
+                  {current.image_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={current.image_url} alt={current.title} draggable={false} style={{ width: '100%', height: 560, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
+                  )}
 
                   {/* Fade image into card */}
                   <div style={{ height: 56, marginTop: -56, background: 'linear-gradient(to bottom, transparent, rgba(10,10,10,0.98))', flexShrink: 0, pointerEvents: 'none' }} />
 
                   {/* Info */}
-                  <div style={{ padding: '0 22px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)', margin: '-6px -22px 14px' }} />
+                  <div style={{ padding: '0 22px 20px' }}>
+                    <div style={{ height: 2, background: 'linear-gradient(90deg, #ff1a1a, transparent)', margin: '-6px -22px 14px' }} />
                     <h2 style={{ color: 'white', fontSize: 21, fontWeight: 900, marginBottom: 8, letterSpacing: 0.3, lineHeight: 1.2 }}>
                       {current.title}
                     </h2>
-                    <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginBottom: 3 }}>📅 {formatEventDate(current.date)}</p>
-                    <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginBottom: 10 }}>📍 {current.location}</p>
-                    {current.description && (
-                      <p style={{
-                        color: 'rgba(255,255,255,0.32)', fontSize: 13, lineHeight: 1.5, flex: 1,
-                        overflow: 'hidden', display: '-webkit-box',
-                        WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
-                      }}>
-                        {current.description}
-                      </p>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 12 }}>
-                      <span style={{ color: 'white', fontSize: 26, fontWeight: 900 }}>€{current.price}</span>
-                      {current.tickets_remaining != null && (
-                        <span style={{ color: 'rgba(255,255,255,0.28)', fontSize: 12 }}>{current.tickets_remaining} left</span>
-                      )}
-                    </div>
+                    <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginBottom: 3 }}>📅 {formatEventDate(current.starts_at)}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>📍 {current.venues?.name ?? 'Venue TBA'}</p>
                   </div>
                 </div>
               )}
@@ -357,17 +314,19 @@ export default function FinderPage() {
                 disabled={!!exiting}
                 className="finder-btn"
                 aria-label="Skip"
-                style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(204,0,0,0.1)', border: '2px solid rgba(204,0,0,0.35)', color: '#cc0000', fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(204,0,0,0.15)' }}
+                style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,26,26,0.1)', border: '2px solid rgba(255,26,26,0.35)', color: '#ff1a1a', fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(255,26,26,0.15)' }}
               >
                 ✕
               </button>
 
-              <Link
-                href={`/checkout?eventId=${encodeURIComponent(current.id)}`}
-                style={{ padding: '10px 18px', borderRadius: 10, background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+              <a
+                href={current.ticket_url ?? `/checkout?eventId=${encodeURIComponent(current.id)}`}
+                target={current.ticket_url ? '_blank' : undefined}
+                rel={current.ticket_url ? 'noopener noreferrer' : undefined}
+                style={{ padding: '10px 18px', borderRadius: 10, background: 'white', border: 'none', color: 'black', fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}
               >
-                Buy Ticket
-              </Link>
+                Get Tickets
+              </a>
 
               <button
                 onClick={() => swipe('right', index, liked)}
@@ -397,10 +356,9 @@ export default function FinderPage() {
                   <div key={e.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 14, padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ color: 'white', fontWeight: 700, fontSize: 14, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.title}</p>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{formatEventDate(e.date)} · {e.location}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{formatEventDate(e.starts_at)} · {e.venues?.name ?? 'Venue TBA'}</p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                      <span style={{ color: 'white', fontWeight: 900, fontSize: 16 }}>€{e.price}</span>
                       <Link
                         href={`/checkout?eventId=${encodeURIComponent(e.id)}`}
                         style={{ background: 'white', color: 'black', padding: '6px 14px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 700 }}

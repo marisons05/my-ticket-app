@@ -163,7 +163,7 @@ export default function AccountPage() {
         .acc-card:nth-child(3) { animation-delay: 0.25s; }
         .acc-card:nth-child(4) { animation-delay: 0.35s; }
         .acc-input::placeholder { color: rgba(255,255,255,0.28); }
-        .acc-input:focus { border-color: rgba(204,0,0,0.6) !important; background: rgba(255,255,255,0.08) !important; }
+        .acc-input:focus { border-color: rgba(255,26,26,0.6) !important; background: rgba(255,255,255,0.08) !important; }
         .acc-btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .acc-btn-primary { transition: all 0.2s ease; }
         .acc-btn-ghost:hover { background: rgba(255,255,255,0.1) !important; }
@@ -188,7 +188,7 @@ export default function AccountPage() {
 
           {/* Profile info */}
           <div className="acc-card" style={{ ...cardStyle }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #ff1a1a, transparent)' }} />
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 3, marginBottom: 16, textTransform: 'uppercase' }}>Profile</p>
             <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 15, marginBottom: 8 }}>📧 {user?.email}</p>
             <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 15, marginBottom: 8 }}>👤 {username}</p>
@@ -199,7 +199,7 @@ export default function AccountPage() {
 
           {/* Change username */}
           <div className="acc-card" style={{ ...cardStyle }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #ff1a1a, transparent)' }} />
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 3, marginBottom: 16, textTransform: 'uppercase' }}>Change Username</p>
             <input
               type="text"
@@ -220,7 +220,7 @@ export default function AccountPage() {
 
           {/* Favorite Artists */}
           <div className="acc-card" style={{ ...cardStyle }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #ff1a1a, transparent)' }} />
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 3, marginBottom: 16, textTransform: 'uppercase' }}>Favorite Artists</p>
 
             <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
@@ -255,9 +255,9 @@ export default function AccountPage() {
                         gap: 6,
                         padding: '6px 14px',
                         borderRadius: 100,
-                        border: '1px solid rgba(204,0,0,0.4)',
-                        background: 'rgba(204,0,0,0.1)',
-                        color: '#cc0000',
+                        border: '1px solid rgba(255,26,26,0.4)',
+                        background: 'rgba(255,26,26,0.1)',
+                        color: '#ff1a1a',
                         fontSize: 13,
                         fontWeight: 600,
                       }}
@@ -266,7 +266,7 @@ export default function AccountPage() {
                       <button
                         onClick={() => handleRemoveArtist(artist)}
                         className="remove-x"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cc0000', opacity: 0.5, fontSize: 14, padding: 0, lineHeight: 1, transition: 'opacity 0.2s' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ff1a1a', opacity: 0.5, fontSize: 14, padding: 0, lineHeight: 1, transition: 'opacity 0.2s' }}
                         aria-label={`Remove ${artist}`}
                       >
                         ×
@@ -286,7 +286,7 @@ export default function AccountPage() {
 
           {/* Liked Events */}
           <div className="acc-card" style={{ ...cardStyle }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #ff1a1a, transparent)' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase' }}>♥ Liked Events</p>
               <Link href="/finder" style={{ color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Open Finder →</Link>
@@ -304,7 +304,7 @@ export default function AccountPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={event.image_url} alt={event.title} style={{ width: 72, height: 72, objectFit: 'cover', flexShrink: 0 }} />
                       ) : (
-                        <div style={{ width: 72, height: 72, flexShrink: 0, background: 'rgba(204,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🎵</div>
+                        <div style={{ width: 72, height: 72, flexShrink: 0, background: 'rgba(255,26,26,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🎵</div>
                       )}
                       <div style={{ flex: 1, minWidth: 0, padding: '10px 0' }}>
                         <p style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.title}</p>
@@ -329,7 +329,7 @@ export default function AccountPage() {
 
           {/* My Tickets */}
           <div className="acc-card" style={{ ...cardStyle, marginBottom: 0 }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #ff1a1a, transparent)' }} />
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 3, marginBottom: 16, textTransform: 'uppercase' }}>🎟️ My Tickets</p>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>You have not purchased any tickets yet.</p>
             <button

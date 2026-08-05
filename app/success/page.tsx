@@ -50,7 +50,7 @@ function SuccessContent() {
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 70px)', padding: '40px 24px' }}>
       <div style={{ textAlign: 'center', animation: 'fadeUp 0.6s ease both', maxWidth: 480 }}>
         <div style={{ fontSize: 72, animation: 'pop 0.5s ease 0.2s both', display: 'inline-block', marginBottom: 24 }}>🎟️</div>
-        <p style={{ color: '#cc0000', fontSize: 11, letterSpacing: 4, marginBottom: 12, textTransform: 'uppercase', fontWeight: 700 }}>Ticket Confirmed</p>
+        <p style={{ color: '#ff1a1a', fontSize: 11, letterSpacing: 4, marginBottom: 12, textTransform: 'uppercase', fontWeight: 700 }}>Ticket Confirmed</p>
         <h1 style={{ color: 'white', fontSize: 32, fontWeight: 900, marginBottom: 12, letterSpacing: 0.5 }}>
           You&apos;re in!
         </h1>
