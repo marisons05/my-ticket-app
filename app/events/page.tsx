@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase'
 import Navbar from '../components/Navbar'
 import EventImage from '../components/EventImage'
 
+export const dynamic = 'force-dynamic'
+
 
 const DOTS = [
   { top: '8%',  left: '3%',  size: 10, delay: 0,   color: '#ff6b9d' },
