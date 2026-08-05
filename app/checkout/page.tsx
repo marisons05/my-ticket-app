@@ -27,16 +27,6 @@ export default async function CheckoutPage({
   return (
     <>
       <style>{`
-        @keyframes orb1 {
-          0%,100% { transform: translate(0,0) scale(1); }
-          33% { transform: translate(40px,-30px) scale(1.1); }
-          66% { transform: translate(-20px,20px) scale(0.95); }
-        }
-        @keyframes orb2 {
-          0%,100% { transform: translate(0,0) scale(1); }
-          33% { transform: translate(-50px,20px) scale(1.05); }
-          66% { transform: translate(30px,-15px) scale(0.9); }
-        }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(24px); }
           to { opacity: 1; transform: translateY(0); }
@@ -46,37 +36,28 @@ export default async function CheckoutPage({
 
       <main style={{
         minHeight: '100vh',
-        background: 'linear-gradient(160deg, #06000e 0%, #180838 40%, #2a0e5a 70%, #06000e 100%)',
+        background: '#000',
         position: 'relative',
         overflowX: 'hidden',
-        fontFamily: 'var(--font-geist-sans, Arial, sans-serif)',
+        fontFamily: 'var(--font-space-mono, monospace)',
       }}>
-
-        {/* Background orbs */}
-        <div aria-hidden style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-          <div style={{ position: 'absolute', top: '10%', left: '15%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%)', animation: 'orb1 18s ease-in-out infinite' }} />
-          <div style={{ position: 'absolute', top: '50%', right: '10%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,107,157,0.18) 0%, transparent 70%)', animation: 'orb2 22s ease-in-out infinite' }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
-        </div>
 
         <Navbar />
 
-        <div style={{ position: 'relative', zIndex: 10, padding: '48px 24px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ padding: '48px 24px', display: 'flex', justifyContent: 'center' }}>
           <div
             className="checkout-card"
             style={{
               width: '100%',
               maxWidth: 480,
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 20,
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              borderRadius: 18,
               padding: 36,
-              backdropFilter: 'blur(16px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
             }}
           >
             {/* Top accent bar */}
-            <div style={{ height: 3, background: 'linear-gradient(90deg, #7c3aed, #ff6b9d, #00d4ff)', borderRadius: 2, marginBottom: 28 }} />
+            <div style={{ height: 2, background: 'linear-gradient(90deg, #cc0000, transparent)', borderRadius: 2, marginBottom: 28 }} />
 
             <h2 style={{ fontSize: 22, fontWeight: 900, color: 'white', marginBottom: 24, letterSpacing: 0.5 }}>
               Order Summary

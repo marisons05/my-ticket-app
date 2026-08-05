@@ -13,7 +13,7 @@ export default function MapWithFilter({ events }: { events: any[] }) {
 
   const filtered = useMemo(() => {
     return events.filter(e => {
-      const d = e.date ? new Date(e.date) : null
+      const d = e.starts_at ? new Date(e.starts_at) : null
       if (!d) return true
       if (appliedFrom) {
         const fromStart = new Date(appliedFrom)
@@ -48,66 +48,58 @@ export default function MapWithFilter({ events }: { events: any[] }) {
     <>
       <style>{`
         .map-dp .react-datepicker {
-          background: rgba(18, 4, 40, 0.98);
-          border: 1px solid rgba(180,125,255,0.3);
+          background: #111;
+          border: 1px solid rgba(255,255,255,0.1);
           border-radius: 14px;
-          font-family: inherit;
-          box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 30px rgba(124,58,237,0.2);
+          font-family: var(--font-space-mono, monospace);
+          box-shadow: 0 16px 48px rgba(0,0,0,0.7);
           overflow: hidden;
         }
         .map-dp .react-datepicker__header {
-          background: rgba(124,58,237,0.15);
-          border-bottom: 1px solid rgba(180,125,255,0.2);
+          background: rgba(255,255,255,0.04);
+          border-bottom: 1px solid rgba(255,255,255,0.08);
           border-radius: 0;
           padding-top: 12px;
         }
         .map-dp .react-datepicker__current-month {
           color: white;
-          font-weight: 800;
+          font-weight: 700;
           font-size: 13px;
           letter-spacing: 1px;
         }
         .map-dp .react-datepicker__day-name {
-          color: rgba(180,125,255,0.6);
+          color: rgba(255,255,255,0.35);
           font-size: 11px;
           font-weight: 700;
           width: 2rem;
         }
         .map-dp .react-datepicker__day {
           color: rgba(255,255,255,0.75);
-          border-radius: 8px;
+          border-radius: 6px;
           width: 2rem;
           line-height: 2rem;
           font-size: 13px;
           transition: background 0.15s;
         }
         .map-dp .react-datepicker__day:hover {
-          background: rgba(124,58,237,0.4);
+          background: rgba(204,0,0,0.35);
           color: white;
         }
         .map-dp .react-datepicker__day--selected,
         .map-dp .react-datepicker__day--keyboard-selected {
-          background: linear-gradient(135deg, #7c3aed, #ff6b9d);
+          background: #cc0000;
           color: white;
           font-weight: 700;
         }
-        .map-dp .react-datepicker__day--outside-month {
-          color: rgba(255,255,255,0.2);
-        }
-        .map-dp .react-datepicker__navigation-icon::before {
-          border-color: rgba(180,125,255,0.7);
-        }
-        .map-dp .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
-          border-color: white;
-        }
-        .map-dp-popper {
-          z-index: 99999 !important;
-        }
+        .map-dp .react-datepicker__day--outside-month { color: rgba(255,255,255,0.2); }
+        .map-dp .react-datepicker__navigation-icon::before { border-color: rgba(255,255,255,0.4); }
+        .map-dp .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before { border-color: white; }
+        .map-dp-popper { z-index: 99999 !important; }
         .map-dp .react-datepicker__triangle { display: none; }
         .map-dp-input {
           background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(180,125,255,0.3);
-          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 8px;
           color: white;
           font-size: 13px;
           font-weight: 600;
@@ -115,13 +107,10 @@ export default function MapWithFilter({ events }: { events: any[] }) {
           outline: none;
           cursor: pointer;
           width: 130px;
-          caret-color: #b47dff;
-          transition: border-color 0.15s, box-shadow 0.15s;
+          font-family: var(--font-space-mono, monospace);
+          transition: border-color 0.15s;
         }
-        .map-dp-input:focus {
-          border-color: rgba(180,125,255,0.7);
-          box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
-        }
+        .map-dp-input:focus { border-color: #cc0000; }
         .map-dp-input::placeholder { color: rgba(255,255,255,0.25); }
       `}</style>
 
@@ -132,14 +121,15 @@ export default function MapWithFilter({ events }: { events: any[] }) {
           alignItems: 'center',
           gap: 16,
           padding: '12px 20px',
-          background: 'rgba(6,0,14,0.8)',
-          borderBottom: '1px solid rgba(180,125,255,0.2)',
+          background: 'rgba(0,0,0,0.9)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
           backdropFilter: 'blur(12px)',
           flexWrap: 'wrap',
           zIndex: 10,
           position: 'relative',
+          fontFamily: 'var(--font-space-mono, monospace)',
         }}>
-          <span style={{ color: 'rgba(180,125,255,0.7)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700 }}>
             Filter by date
           </span>
 
@@ -180,39 +170,43 @@ export default function MapWithFilter({ events }: { events: any[] }) {
             onClick={handleApply}
             disabled={!isDirty && !from && !to}
             style={{
-              background: isDirty ? 'linear-gradient(135deg, #7c3aed, #ff6b9d)' : 'rgba(124,58,237,0.15)',
-              border: '1px solid rgba(180,125,255,0.4)',
-              borderRadius: 10,
-              color: isDirty ? 'white' : 'rgba(180,125,255,0.4)',
-              fontSize: 13,
+              background: isDirty ? 'white' : 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 8,
+              color: isDirty ? 'black' : 'rgba(255,255,255,0.3)',
+              fontSize: 12,
               fontWeight: 700,
               padding: '9px 20px',
               cursor: isDirty ? 'pointer' : 'default',
+              fontFamily: 'var(--font-space-mono, monospace)',
+              letterSpacing: 1,
               transition: 'all 0.2s',
             }}
           >
-            Apply
+            APPLY
           </button>
 
           {isFiltered && (
             <button
               onClick={handleClear}
               style={{
-                background: 'rgba(255,107,157,0.1)',
-                border: '1px solid rgba(255,107,157,0.3)',
-                borderRadius: 10,
-                color: '#ff6b9d',
-                fontSize: 13,
+                background: 'rgba(204,0,0,0.1)',
+                border: '1px solid rgba(204,0,0,0.3)',
+                borderRadius: 8,
+                color: '#cc0000',
+                fontSize: 12,
                 fontWeight: 700,
                 padding: '9px 16px',
                 cursor: 'pointer',
+                fontFamily: 'var(--font-space-mono, monospace)',
+                letterSpacing: 1,
               }}
             >
-              Clear
+              CLEAR
             </button>
           )}
 
-          <span style={{ marginLeft: 'auto', color: 'rgba(180,125,255,0.6)', fontSize: 12, fontWeight: 600 }}>
+          <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.35)', fontSize: 12, fontWeight: 600 }}>
             {filtered.length} event{filtered.length !== 1 ? 's' : ''}
           </span>
         </div>

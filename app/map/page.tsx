@@ -3,10 +3,14 @@ import Navbar from '../components/Navbar'
 import MapWithFilter from '../components/MapWithFilter'
 
 export default async function MapPage() {
-  const { data: events } = await supabase.from('events').select('*')
+  const { data: events } = await supabase
+    .from('events')
+    .select('id, title, starts_at, ticket_url, genre_tags, venues(name, lat, lng)')
+    .eq('status', 'published')
+    .order('starts_at', { ascending: true })
 
   return (
-    <div style={{ minHeight: '100vh', background: '#06000e', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: '#000', position: 'relative', fontFamily: 'var(--font-space-mono, monospace)' }}>
       <div style={{ position: 'relative', zIndex: 1000 }}>
         <Navbar />
       </div>
@@ -15,8 +19,7 @@ export default async function MapPage() {
           height: 'calc(100vh - 130px)',
           borderRadius: 18,
           overflow: 'hidden',
-          border: '1px solid rgba(180,125,255,0.35)',
-          boxShadow: '0 0 0 1px rgba(124,58,237,0.2), 0 0 40px rgba(124,58,237,0.15), inset 0 0 0 1px rgba(180,125,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.09)',
         }}>
           <MapWithFilter events={events ?? []} />
         </div>

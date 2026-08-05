@@ -34,18 +34,19 @@ export default function PayButton({ eventId, eventTitle, price }: {
         onClick={handlePay}
         disabled={loading}
         style={{
-          background: loading ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #7c3aed, #ff6b9d)',
-          color: 'white',
+          background: loading ? 'rgba(255,255,255,0.1)' : 'white',
+          color: loading ? 'rgba(255,255,255,0.5)' : 'black',
           padding: '15px 28px',
           borderRadius: '12px',
           border: 'none',
-          fontWeight: 800,
+          fontWeight: 700,
           fontSize: '16px',
           letterSpacing: 0.5,
           cursor: loading ? 'not-allowed' : 'pointer',
           width: '100%',
           transition: 'filter 0.2s, transform 0.2s',
           opacity: loading ? 0.6 : 1,
+          fontFamily: 'var(--font-space-mono, monospace)',
         }}
       >
         {loading ? 'Redirecting to payment...' : `Pay €${price}`}
