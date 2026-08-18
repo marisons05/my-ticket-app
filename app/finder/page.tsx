@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Navbar from '../components/Navbar'
 import RainCanvas from '../components/RainCanvas'
@@ -12,6 +12,17 @@ const supabase = createClient(
 )
 
 export const FINDER_LIKED_KEY = 'finder_liked_events'
+
+function HideFooter() {
+  useLayoutEffect(() => {
+    const el = document.getElementById('site-footer')
+    if (el) el.style.display = 'none'
+    return () => {
+      if (el) el.style.display = ''
+    }
+  }, [])
+  return null
+}
 
 
 type Event = {
@@ -40,6 +51,7 @@ export default function FinderPage() {
   const [dragX, setDragX] = useState(0)
   const [dragY, setDragY] = useState(0)
   const [exiting, setExiting] = useState<'left' | 'right' | null>(null)
+  const [libraryOpen, setLibraryOpen] = useState(false)
 
   const isDragging = useRef(false)
   const startX = useRef(0)
@@ -147,6 +159,7 @@ export default function FinderPage() {
 
   return (
     <>
+      <HideFooter />
       <style>{`
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(24px); }
@@ -173,8 +186,15 @@ export default function FinderPage() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 20px 56px' }}>
 
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 28, animation: 'fadeUp 0.5s ease both' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28, animation: 'fadeUp 0.5s ease both', position: 'relative', width: '100%', maxWidth: 400 }}>
             <h1 style={{ color: 'white', fontSize: 28, fontWeight: 900, letterSpacing: 1 }}>Event Finder</h1>
+            <button
+              onClick={() => setLibraryOpen(true)}
+              style={{ position: 'absolute', right: 0, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '10px 18px', color: 'white', cursor: 'pointer', fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-space-mono, monospace)', display: 'flex', alignItems: 'center', gap: 7 }}
+            >
+              <span style={{ color: '#ff1a1a', fontSize: 18 }}>♥</span>
+              {liked.length > 0 ? <span style={{ color: 'white' }}>{liked.length}</span> : <span style={{ color: 'white' }}>Library</span>}
+            </button>
           </div>
 
           {/* Card area */}
@@ -340,40 +360,83 @@ export default function FinderPage() {
             </div>
           )}
 
-          {/* Liked events list */}
-          {likedEvents.length > 0 && (
-            <div style={{ width: '100%', maxWidth: 480, marginTop: 48, animation: 'fadeUp 0.5s ease 0.2s both' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 4, textTransform: 'uppercase' }}>
-                  Saved ♥ {likedEvents.length}
-                </p>
-                <Link href="/account" style={{ color: 'white', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
-                  View all in account →
-                </Link>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {likedEvents.map(e => (
-                  <div key={e.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 14, padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ color: 'white', fontWeight: 700, fontSize: 14, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.title}</p>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{formatEventDate(e.starts_at)} · {e.venues?.name ?? 'Venue TBA'}</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                      <Link
-                        href={`/checkout?eventId=${encodeURIComponent(e.id)}`}
-                        style={{ background: 'white', color: 'black', padding: '6px 14px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 700 }}
-                      >
-                        Buy
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
         </div>
       </main>
+
+      {/* Library drawer */}
+      {libraryOpen && (
+        <div
+          onClick={() => setLibraryOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 10000, backdropFilter: 'blur(4px)' }}
+        />
+      )}
+      <div style={{
+        position: 'fixed',
+        top: 70,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        maxWidth: 420,
+        background: '#0a0a0a',
+        borderLeft: '1px solid rgba(255,255,255,0.09)',
+        zIndex: 10001,
+        transform: libraryOpen ? 'translateX(0)' : 'translateX(100%)',
+        transition: 'transform 0.3s cubic-bezier(.4,0,.2,1)',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'var(--font-space-mono, monospace)',
+      }}>
+        {/* Drawer header */}
+        <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, letterSpacing: 4, textTransform: 'uppercase', marginBottom: 4 }}>Finder</p>
+            <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, letterSpacing: 0.5 }}>♥ Library</h2>
+          </div>
+          <button
+            onClick={() => setLibraryOpen(false)}
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 36, height: 36, color: 'white', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Drawer content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 32px' }}>
+          {likedEvents.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '64px 20px' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>♥</div>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>No saved events yet. Swipe right on events you like!</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {likedEvents.map(e => (
+                <div key={e.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+                  {e.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={e.image_url} alt={e.title} style={{ width: 72, height: 72, objectFit: 'cover', flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: 72, height: 72, flexShrink: 0, background: 'rgba(255,26,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🎵</div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0, padding: '10px 12px' }}>
+                    <p style={{ color: 'white', fontWeight: 700, fontSize: 13, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.title}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>{formatEventDate(e.starts_at)} · {e.venues?.name ?? 'Venue TBA'}</p>
+                  </div>
+                  <div style={{ padding: '0 14px', flexShrink: 0 }}>
+                    <Link
+                      href={e.ticket_url ?? `/checkout?eventId=${encodeURIComponent(e.id)}`}
+                      onClick={() => setLibraryOpen(false)}
+                      style={{ background: 'white', color: 'black', padding: '6px 14px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', display: 'block' }}
+                    >
+                      Get
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </>
   )
 }

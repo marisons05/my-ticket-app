@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer style={{
+    <footer id="site-footer" style={{
       borderTop: '1px solid rgba(255,255,255,0.08)',
       padding: '32px 40px',
       textAlign: 'center',
