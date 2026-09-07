@@ -13,6 +13,7 @@
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.0",
     "@types/react-datepicker": "^6.2.0",
+    "@vercel/analytics": "^2.0.1",
     "cheerio": "^1.2.0",
     "date-fns-tz": "^3.2.0",
     "leaflet": "^1.9.4",
@@ -31,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "playwright": "^1.62.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

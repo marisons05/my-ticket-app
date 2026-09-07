@@ -11,7 +11,14 @@ interface Drop {
   width: number
 }
 
-export default function RainCanvas() {
+interface Props {
+  density?: number   // divisor for drop count — higher = fewer drops (default 5)
+  maxOpacity?: number // max drop opacity (default 0.35)
+  maxSpeed?: number   // max additional speed (default 1.2)
+  fill?: boolean      // fill the parent element instead of the whole viewport (default false)
+}
+
+export default function RainCanvas({ density = 5, maxOpacity = 0.35, maxSpeed = 1.2, fill = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -25,22 +32,27 @@ export default function RainCanvas() {
 
     function resize() {
       if (!canvas) return
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      if (fill && canvas.parentElement) {
+        canvas.width = canvas.parentElement.clientWidth
+        canvas.height = canvas.parentElement.clientHeight
+      } else {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+      }
       initDrops()
     }
 
     function initDrops() {
       if (!canvas) return
       drops = []
-      const count = Math.floor(canvas.width / 5)
+      const count = Math.floor(canvas.width / density)
       for (let i = 0; i < count; i++) {
         drops.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          speed: 0.4 + Math.random() * 1.2,
+          speed: 0.4 + Math.random() * maxSpeed,
           length: 20 + Math.random() * 120,
-          opacity: 0.08 + Math.random() * 0.35,
+          opacity: 0.04 + Math.random() * maxOpacity,
           width: 0.5 + Math.random() * 1.2,
         })
       }
@@ -81,24 +93,29 @@ export default function RainCanvas() {
     resize()
     draw()
 
-    window.addEventListener('resize', resize)
+    let ro: ResizeObserver | undefined
+    if (fill && canvas.parentElement && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(resize)
+      ro.observe(canvas.parentElement)
+    } else {
+      window.addEventListener('resize', resize)
+    }
+
     return () => {
-      window.removeEventListener('resize', resize)
+      if (ro) ro.disconnect()
+      else window.removeEventListener('resize', resize)
       cancelAnimationFrame(animId)
     }
-  }, [])
+  }, [fill])
 
   return (
     <canvas
       ref={canvasRef}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: -1,
-        pointerEvents: 'none',
-      }}
+      style={
+        fill
+          ? { position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }
+          : { position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none' }
+      }
       aria-hidden
     />
   )

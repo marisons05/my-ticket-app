@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
+import { Analytics } from "@vercel/analytics/react";
 
 const spaceMono = Space_Mono({
   weight: ["400", "700"],
@@ -27,7 +28,7 @@ export default function RootLayout({
 <head>
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
       </head>
-      <body className="min-h-full flex flex-col">{children}<Footer /></body>
+      <body className="min-h-full flex flex-col">{children}<Footer /><Analytics /></body>
     </html>
   );
 }

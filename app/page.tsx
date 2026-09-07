@@ -92,9 +92,6 @@ export default async function LandingPage() {
           </p>
         </section>
 
-
-
-
         {/* ── Genres ── */}
         <section style={{ position: 'relative', zIndex: 10, padding: '64px 40px 48px', textAlign: 'center' }}>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, letterSpacing: 4, marginBottom: 24, textTransform: 'uppercase' }}>What&apos;s on</p>

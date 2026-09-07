@@ -37,15 +37,25 @@ export default function EventGrid({ events }: { events: Event[] }) {
         .ev-card { transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer; }
         .ev-buy:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .ev-buy { transition: all 0.2s ease; }
+        .ev-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+        @media (min-width: 600px) { .ev-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; } }
+        @media (min-width: 1024px) { .ev-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1280px) { .ev-grid { grid-template-columns: repeat(4, 1fr); } }
       `}</style>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, maxWidth: 1400, margin: '0 auto' }}>
+      <div className="ev-grid">
         {events.map(event => (
           <div
             key={event.id}
             className="ev-card"
             onClick={() => setSelected(event)}
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 18, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 18, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}
           >
             <EventImage src={event.image_url} alt={event.title} seed={event.id} height={420} />
             <div style={{ padding: 24, display: 'flex', flexDirection: 'column', flex: 1 }}>

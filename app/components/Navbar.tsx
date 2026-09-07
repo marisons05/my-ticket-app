@@ -59,7 +59,7 @@ export default function Navbar() {
           border: none;
           width: 100%;
           text-align: left;
-          font-family: var(--font-space-mono, monospace);
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
           transition: background 0.15s;
         }
         .nav-item:hover { background: rgba(255,255,255,0.07); }

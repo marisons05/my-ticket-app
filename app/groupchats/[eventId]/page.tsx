@@ -19,10 +19,11 @@ type Message = {
   created_at: string
 }
 
-type Event = {
+type EventInfo = {
   title: string
-  date: string
-  location: string
+  starts_at: string
+  image_url: string | null
+  venues: { name: string } | null
 }
 
 function formatTime(iso: string): string {
@@ -32,13 +33,15 @@ function formatTime(iso: string): string {
 
 export default function GroupchatPage() {
   const { eventId } = useParams<{ eventId: string }>()
-  const [event, setEvent] = useState<Event | null>(null)
+  const [event, setEvent] = useState<EventInfo | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [userId, setUserId] = useState<string | null>(null)
   const [username, setUsername] = useState('')
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null)
+  const [isMember, setIsMember] = useState<boolean | null>(null)
+  const [joining, setJoining] = useState(false)
   const [sending, setSending] = useState(false)
+  const [memberCount, setMemberCount] = useState<number | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
 
@@ -49,7 +52,6 @@ export default function GroupchatPage() {
 
       setUserId(user.id)
 
-      // Load username
       const { data: profile } = await supabase
         .from('profiles')
         .select('username')
@@ -57,26 +59,18 @@ export default function GroupchatPage() {
         .single()
       setUsername(profile?.username || user.email?.split('@')[0] || 'Anonymous')
 
-      // Check ticket access
-      const { data: ticket } = await supabase
-        .from('tickets')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('event_id', eventId)
-        .maybeSingle()
+      const [evRes, memberRes, countRes] = await Promise.all([
+        supabase.from('events').select('title, starts_at, image_url, venues(name)').eq('id', eventId).single(),
+        supabase.from('groupchat_members').select('id').eq('user_id', user.id).eq('event_id', eventId).maybeSingle(),
+        supabase.from('groupchat_members').select('id', { count: 'exact', head: true }).eq('event_id', eventId),
+      ])
 
-      if (!ticket) { setHasAccess(false); return }
-      setHasAccess(true)
+      if (evRes.data) setEvent(evRes.data as unknown as EventInfo)
+      setMemberCount(countRes.count ?? null)
 
-      // Load event info
-      const { data: ev } = await supabase
-        .from('events')
-        .select('title, date, location')
-        .eq('id', eventId)
-        .single()
-      if (ev) setEvent(ev)
+      setIsMember(!!memberRes.data)
 
-      // Load existing messages
+      // Load messages and subscribe for everyone
       const { data: msgs } = await supabase
         .from('messages')
         .select('*')
@@ -85,7 +79,11 @@ export default function GroupchatPage() {
         .limit(200)
       if (msgs) setMessages(msgs)
 
-      // Subscribe to new messages
+      if (channelRef.current) {
+        await supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+
       channelRef.current = supabase
         .channel(`chat:${eventId}`)
         .on('postgres_changes', {
@@ -98,6 +96,7 @@ export default function GroupchatPage() {
         })
         .subscribe()
     }
+
     init()
     return () => { channelRef.current?.unsubscribe() }
   }, [eventId])
@@ -106,108 +105,100 @@ export default function GroupchatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  async function handleJoin() {
+    setJoining(true)
+    const { error } = await supabase
+      .from('groupchat_members')
+      .upsert({ event_id: eventId, user_id: userId }, { onConflict: 'event_id,user_id', ignoreDuplicates: true })
+
+    if (error) {
+      alert(`Could not join: ${error.message}`)
+      setJoining(false)
+      return
+    }
+
+    setMemberCount(c => (c ?? 0) + 1)
+    setIsMember(true)
+    setJoining(false)
+  }
+
   async function sendMessage() {
     const text = input.trim()
     if (!text || !userId || sending) return
     setSending(true)
     setInput('')
-    await supabase.from('messages').insert({
-      event_id: eventId,
-      user_id: userId,
-      username,
-      content: text,
-    })
+    await supabase.from('messages').insert({ event_id: eventId, user_id: userId, username, content: text })
     setSending(false)
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
 
-  if (hasAccess === false) {
+  if (isMember === null) {
     return (
-      <>
-        <main style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #06000e 0%, #180838 40%, #2a0e5a 70%, #06000e 100%)', fontFamily: 'var(--font-geist-sans, Arial, sans-serif)' }}>
-          <Navbar />
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 70px)', padding: 24, textAlign: 'center' }}>
-            <div style={{ fontSize: 52, marginBottom: 16 }}>🔒</div>
-            <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, marginBottom: 8 }}>Ticket required</h2>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginBottom: 24 }}>
-              You need a ticket to this event to join its groupchat.
-            </p>
-            <Link href="/events" style={{ background: 'linear-gradient(135deg, #7c3aed, #ff6b9d)', color: 'white', padding: '12px 28px', borderRadius: 12, textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
-              Browse Events
-            </Link>
-          </div>
-        </main>
-      </>
+      <main style={{ minHeight: '100vh', background: '#000', fontFamily: 'var(--font-space-mono, monospace)' }}>
+        <Navbar />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 70px)', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
+          Loading...
+        </div>
+      </main>
     )
   }
 
   return (
     <>
       <style>{`
-        @keyframes orb1 {
-          0%,100% { transform: translate(0,0) scale(1); }
-          33% { transform: translate(40px,-30px) scale(1.1); }
-          66% { transform: translate(-20px,20px) scale(0.95); }
-        }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        footer { display: none !important; }
         .msg-bubble { animation: fadeUp 0.2s ease both; }
         .send-btn:hover { filter: brightness(1.15); }
         .send-btn { transition: filter 0.15s; }
-        textarea:focus { outline: none; border-color: rgba(180,125,255,0.5) !important; }
+        textarea:focus { outline: none; border-color: rgba(255,26,26,0.4) !important; }
         textarea::placeholder { color: rgba(255,255,255,0.25); }
+        .join-btn:hover { background: #cc0000 !important; }
+        .join-btn { transition: background 0.15s; }
       `}</style>
 
-      <main style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'linear-gradient(160deg, #06000e 0%, #180838 40%, #2a0e5a 70%, #06000e 100%)',
-        position: 'relative',
-        overflowX: 'hidden',
-        fontFamily: 'var(--font-geist-sans, Arial, sans-serif)',
-      }}>
-        <div aria-hidden style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-          <div style={{ position: 'absolute', top: '5%', left: '10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%)', animation: 'orb1 18s ease-in-out infinite' }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
-        </div>
+      <main style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#000', overflowX: 'hidden', fontFamily: 'var(--font-space-mono, monospace)' }}>
 
-        {/* Navbar */}
-        <div style={{ position: 'relative', zIndex: 20, flexShrink: 0 }}>
+        <div style={{ flexShrink: 0 }}>
           <Navbar />
         </div>
 
-        {/* Chat header */}
-        <div style={{ position: 'relative', zIndex: 10, flexShrink: 0, padding: '14px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12, backdropFilter: 'blur(12px)', background: 'rgba(6,0,14,0.3)' }}>
+        {/* Header */}
+        <div style={{ flexShrink: 0, padding: '14px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }}>
           <Link href="/groupchats" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: 20, lineHeight: 1 }}>‹</Link>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, rgba(124,58,237,0.6), rgba(255,107,157,0.6))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-            🎵
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <p style={{ color: 'white', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {event?.image_url ? (
+            <div style={{ width: 36, height: 36, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={event.image_url} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          ) : (
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,26,26,0.2)', border: '1px solid rgba(255,26,26,0.3)', flexShrink: 0 }} />
+          )}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
               {event?.title ?? '...'}
             </p>
             {event && (
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>
-                {new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · {event.location}
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: 0 }}>
+                {new Date(event.starts_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                {event.venues?.name ? ` · ${event.venues.name}` : ''}
+                {memberCount !== null ? ` · ${memberCount} member${memberCount !== 1 ? 's' : ''}` : ''}
               </p>
             )}
           </div>
         </div>
 
-        {/* Messages */}
-        <div style={{ position: 'relative', zIndex: 10, flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {messages.length === 0 && hasAccess && (
+        {/* Messages area */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {messages.length === 0 && (
             <div style={{ textAlign: 'center', margin: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: 14 }}>
-              No messages yet. Say hi! 👋
+              No messages yet.
             </div>
           )}
           {messages.map((msg) => {
@@ -222,14 +213,9 @@ export default function GroupchatPage() {
                 <div style={{
                   padding: '10px 14px',
                   borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  background: isMe
-                    ? 'linear-gradient(135deg, #7c3aed, #b347d6)'
-                    : 'rgba(255,255,255,0.08)',
+                  background: isMe ? '#ff1a1a' : 'rgba(255,255,255,0.08)',
                   border: isMe ? 'none' : '1px solid rgba(255,255,255,0.08)',
-                  color: 'white',
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  wordBreak: 'break-word',
+                  color: 'white', fontSize: 14, lineHeight: 1.5, wordBreak: 'break-word',
                 }}>
                   {msg.content}
                 </div>
@@ -242,50 +228,70 @@ export default function GroupchatPage() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
-        <div style={{ position: 'relative', zIndex: 10, flexShrink: 0, padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)', background: 'rgba(6,0,14,0.5)', display: 'flex', gap: 10, alignItems: 'flex-end' }}>
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Message..."
-            rows={1}
-            style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.07)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 14,
-              padding: '11px 16px',
-              color: 'white',
-              fontSize: 14,
-              resize: 'none',
-              maxHeight: 120,
-              lineHeight: 1.5,
-              fontFamily: 'inherit',
-              overflowY: 'auto',
-            }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || sending}
-            className="send-btn"
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 12,
-              background: input.trim() ? 'linear-gradient(135deg, #7c3aed, #ff6b9d)' : 'rgba(255,255,255,0.08)',
-              border: 'none',
-              cursor: input.trim() ? 'pointer' : 'default',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 18,
-              flexShrink: 0,
-              transition: 'background 0.2s',
-            }}
-          >
-            ↑
-          </button>
+        {/* Bottom bar */}
+        <div style={{ flexShrink: 0, padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.7)' }}>
+          {isMember ? (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+              <textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Message..."
+                rows={1}
+                style={{
+                  flex: 1,
+                  background: 'rgba(255,255,255,0.07)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 14,
+                  padding: '11px 16px',
+                  color: 'white',
+                  fontSize: 14,
+                  resize: 'none',
+                  maxHeight: 120,
+                  lineHeight: 1.5,
+                  fontFamily: 'inherit',
+                  overflowY: 'auto',
+                }}
+              />
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || sending}
+                className="send-btn"
+                style={{
+                  width: 42, height: 42, borderRadius: 12,
+                  background: input.trim() ? '#ff1a1a' : 'rgba(255,255,255,0.08)',
+                  border: 'none',
+                  cursor: input.trim() ? 'pointer' : 'default',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 18, color: 'white', flexShrink: 0, transition: 'background 0.2s',
+                }}
+              >
+                ↑
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleJoin}
+              disabled={joining}
+              className="join-btn"
+              style={{
+                width: '100%',
+                background: '#ff1a1a',
+                color: 'white',
+                border: 'none',
+                padding: '14px',
+                borderRadius: 12,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: 1,
+                cursor: joining ? 'default' : 'pointer',
+                opacity: joining ? 0.7 : 1,
+                fontFamily: 'inherit',
+              }}
+            >
+              {joining ? 'Joining...' : 'Join Groupchat'}
+            </button>
+          )}
         </div>
       </main>
     </>

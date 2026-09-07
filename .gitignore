@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# stray local scratch dirs (not part of the app)
+/my-ticket-app/
+/hello-ngrok/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

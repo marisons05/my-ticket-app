@@ -23,6 +23,9 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
   }
   if (dateFrom) {
     query = query.gte('starts_at', new Date(dateFrom).toISOString())
+  } else {
+    // Default: never show events that have already happened.
+    query = query.gte('starts_at', new Date().toISOString())
   }
   if (dateTo) {
     const end = new Date(dateTo)
@@ -55,6 +58,11 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
         input[type="search"]::-webkit-search-cancel-button { filter: invert(1); }
         input[type="search"]::placeholder { color: rgba(255,255,255,0.3); }
         input[type="search"]:focus { border-color: rgba(255,255,255,0.4) !important; }
+        .ev-page-pad { padding: 24px 16px 80px; }
+        @media (min-width: 600px) { .ev-page-pad { padding: 40px 32px 80px; } }
+        .ev-header-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-direction: column; gap: 16px; }
+        @media (min-width: 768px) { .ev-header-row { flex-direction: row; align-items: center; } }
+        .ev-filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
       `}</style>
 
       <main style={{
@@ -67,14 +75,14 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
 
         <Navbar />
 
-        <div style={{ padding: '40px 32px 80px' }}>
+        <div className="ev-page-pad">
 
           {/* Events grid */}
           <section className="ev-section">
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 4, marginBottom: 8, textTransform: 'uppercase' }}>What&apos;s on</p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
-              <h2 style={{ color: 'white', fontSize: 36, fontWeight: 900, letterSpacing: -0.5, margin: 0 }}>Upcoming Events</h2>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <div className="ev-header-row">
+              <h2 style={{ color: 'white', fontSize: 28, fontWeight: 900, letterSpacing: -0.5, margin: 0 }}>Upcoming Events</h2>
+              <div className="ev-filters">
                 <Suspense>
                   <EventSearch />
                 </Suspense>

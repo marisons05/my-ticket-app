@@ -1,10 +1,17 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import EventImage from './EventImage'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
 import 'leaflet/dist/leaflet.css'
+
+const supabase = createClient(
+  process.env['NEXT_PUBLIC_SUPABASE_URL']!,
+  process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!
+)
 
 type Event = {
   id: string
@@ -96,6 +103,9 @@ function VenueMap({ lat, lng, name }: { lat: number; lng: number; name: string }
 }
 
 export default function EventModal({ event, onClose, hideVenueMap }: { event: Event; onClose: () => void; hideVenueMap?: boolean }) {
+  const router = useRouter()
+  const [joining, setJoining] = useState(false)
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
@@ -105,6 +115,30 @@ export default function EventModal({ event, onClose, hideVenueMap }: { event: Ev
       document.body.style.overflow = ''
     }
   }, [onClose])
+
+  async function handleJoinGroupchat() {
+    setJoining(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { window.location.href = '/login'; return }
+
+      const { error } = await supabase
+        .from('groupchat_members')
+        .upsert({ event_id: event.id, user_id: user.id }, { onConflict: 'event_id,user_id', ignoreDuplicates: true })
+
+      if (error) {
+        console.error('groupchat join error:', error)
+        alert(`Could not join groupchat: ${error.message}`)
+        setJoining(false)
+        return
+      }
+
+      window.location.href = `/groupchats/${event.id}`
+    } catch (e) {
+      console.error('groupchat join exception:', e)
+      setJoining(false)
+    }
+  }
 
   const venue = event.venues
   const hasMap = !hideVenueMap && venue?.lat && venue?.lng
@@ -136,6 +170,7 @@ export default function EventModal({ event, onClose, hideVenueMap }: { event: Ev
           flexDirection: 'column',
           animation: 'slideUp 0.25s ease',
           boxShadow: '0 40px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,26,26,0.15)',
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
         }}
       >
         {/* Image */}
@@ -202,7 +237,32 @@ export default function EventModal({ event, onClose, hideVenueMap }: { event: Ev
           )}
 
           {/* CTA */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <button
+              onClick={handleJoinGroupchat}
+              disabled={joining}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'white',
+                padding: '12px 24px',
+                borderRadius: 10,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: 1,
+                cursor: joining ? 'default' : 'pointer',
+                opacity: joining ? 0.6 : 1,
+                transition: 'border-color 0.15s, background 0.15s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+              onMouseEnter={e => { if (!joining) { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.5)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)' } }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.2)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            >
+              {joining ? 'Joining...' : 'Join Groupchat'}
+            </button>
+
             {event.ticket_url ? (
               <a href={event.ticket_url} target="_blank" rel="noopener noreferrer"
                 style={{ background: '#ff1a1a', color: 'white', padding: '12px 28px', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 700, letterSpacing: 1 }}>
